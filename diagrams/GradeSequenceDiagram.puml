@@ -1,0 +1,67 @@
+@startuml
+!include style.puml
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":GradeCommandParser" as GradeCommandParser LOGIC_COLOR
+participant "g:GradeCommand" as GradeCommand LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant ":Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("grade 1 g/Midterm:85")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("grade 1 g/Midterm:85")
+activate AddressBookParser
+
+create GradeCommandParser
+AddressBookParser -> GradeCommandParser
+activate GradeCommandParser
+
+GradeCommandParser --> AddressBookParser
+deactivate GradeCommandParser
+
+AddressBookParser -> GradeCommandParser : parse("1 g/Midterm:85")
+activate GradeCommandParser
+
+create GradeCommand
+GradeCommandParser -> GradeCommand
+activate GradeCommand
+
+GradeCommand --> GradeCommandParser : g
+deactivate GradeCommand
+
+GradeCommandParser --> AddressBookParser : g
+deactivate GradeCommandParser
+
+GradeCommandParser -[hidden]-> AddressBookParser
+destroy GradeCommandParser
+
+AddressBookParser --> LogicManager : g
+deactivate AddressBookParser
+
+LogicManager -> GradeCommand : execute()
+activate GradeCommand
+
+GradeCommand -> Model : getFilteredPersonList()
+activate Model
+
+Model --> GradeCommand
+deactivate Model
+
+GradeCommand -> Model : setPerson(personToEdit, editedPerson)
+activate Model
+
+Model --> GradeCommand
+deactivate Model
+
+GradeCommand --> LogicManager : result
+deactivate GradeCommand
+
+[<-- LogicManager
+deactivate LogicManager
+@enduml
