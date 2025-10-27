@@ -53,6 +53,8 @@
         "implementation": "Implementation",
         "proposed-undo-redo-feature": "[Proposed] Undo/redo feature",
         "proposed-data-archiving": "[Proposed] Data archiving",
+        "view-student-feature": "View Student Feature",
+        "attendance-tracking-feature": "Attendance Tracking Feature",
         "grade-feature": "Grade Feature",
         "documentation-logging-testing-configuration-dev-ops": "Documentation, logging, testing, configuration, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
