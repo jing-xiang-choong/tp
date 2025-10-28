@@ -19,6 +19,11 @@ Class Email
 Class Name
 Class Phone
 Class Tag
+Class StudentId
+Class ModuleCode
+Class AttendanceRecord
+Class Consultation
+Class Grade
 
 Class I #FFFFFF
 }
@@ -42,7 +47,11 @@ Person *--> Phone
 Person *--> Email
 Person *--> Address
 Person *--> "*" Tag
-
+Person *--> StudentId
+Person *--> "*" ModuleCode
+Person *--> AttendanceRecord
+Person *--> "*" Consultation
+Person *--> "*" Grade
 Person -[hidden]up--> I
 UniquePersonList -[hidden]right-> I
 
