@@ -6,21 +6,20 @@ box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":AttendanceCommandParser" as AttendanceCommandParser LOGIC_COLOR
-participant ":ParserUtil" as ParserUtil LOGIC_COLOR
 participant "a:AttendanceCommand" as AttendanceCommand LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
 end box
 
 box Model MODEL_COLOR_T1
 participant ":Model" as Model MODEL_COLOR
-participant ":Person" as Person MODEL_COLOR
-participant ":AttendanceRecord" as AttendanceRecord MODEL_COLOR
+participant "person:Person" as Person MODEL_COLOR
+participant "record:AttendanceRecord" as AttendanceRecord MODEL_COLOR
 end box
 
-[-> LogicManager : execute("attendance s/A0123456X w/1 present")
+[-> LogicManager : execute("attendance 1 w/1 present")
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand("attendance s/A0123456X w/1 present")
+LogicManager -> AddressBookParser : parseCommand("attendance 1 w/1 present")
 activate AddressBookParser
 
 create AttendanceCommandParser
@@ -30,29 +29,18 @@ activate AttendanceCommandParser
 AttendanceCommandParser --> AddressBookParser
 deactivate AttendanceCommandParser
 
-AddressBookParser -> AttendanceCommandParser : parse(" s/A0123456X w/1 present")
+AddressBookParser -> AttendanceCommandParser : parse(" 1 w/1 present")
 activate AttendanceCommandParser
 
-AttendanceCommandParser -> ParserUtil : parseWeek("1")
-activate ParserUtil
-
-ParserUtil --> AttendanceCommandParser : week
-deactivate ParserUtil
-
-AttendanceCommandParser -> ParserUtil : parseAttendanceStatus("present")
-activate ParserUtil
-
-ParserUtil --> AttendanceCommandParser : status
-deactivate ParserUtil
-
-AttendanceCommandParser -> ParserUtil : parseStudentId("A0123456X")
-activate ParserUtil
-
-ParserUtil --> AttendanceCommandParser : studentId
-deactivate ParserUtil
+note right of AttendanceCommandParser
+  Parses:
+  - Index: 1
+  - Week: 1
+  - Status: present
+end note
 
 create AttendanceCommand
-AttendanceCommandParser -> AttendanceCommand
+AttendanceCommandParser -> AttendanceCommand : new AttendanceCommand(index, week, status)
 activate AttendanceCommand
 
 AttendanceCommand --> AttendanceCommandParser : a
@@ -70,55 +58,40 @@ deactivate AddressBookParser
 LogicManager -> AttendanceCommand : execute(model)
 activate AttendanceCommand
 
-AttendanceCommand -> Model : findPersonByStudentId(studentId)
+AttendanceCommand -> Model : getFilteredPersonList()
 activate Model
 
-Model --> AttendanceCommand : person
+Model --> AttendanceCommand : list
 deactivate Model
+
+note right of AttendanceCommand
+  Gets person at index 0
+  from the filtered list
+end note
 
 AttendanceCommand -> Person : getAttendanceRecord()
 activate Person
 
-Person --> AttendanceCommand : attendanceRecord
+Person --> AttendanceCommand : record
 deactivate Person
 
 AttendanceCommand -> AttendanceRecord : markAttendance(week, status)
 activate AttendanceRecord
 
-create AttendanceRecord as NewAttendanceRecord
-AttendanceRecord -> NewAttendanceRecord : <<create new>>
-activate NewAttendanceRecord
-
-NewAttendanceRecord --> AttendanceRecord : updatedRecord
-deactivate NewAttendanceRecord
-
 AttendanceRecord --> AttendanceCommand : updatedRecord
+note right: Returns new\nAttendanceRecord\n(immutable)
 deactivate AttendanceRecord
 
-create Person as UpdatedPerson
-AttendanceCommand -> UpdatedPerson : <<create with updated record>>
-activate UpdatedPerson
-
-UpdatedPerson --> AttendanceCommand : updatedPerson
-deactivate UpdatedPerson
+note right of AttendanceCommand
+  Creates new Person with
+  updated AttendanceRecord
+end note
 
 AttendanceCommand -> Model : setPerson(person, updatedPerson)
 activate Model
 
 Model --> AttendanceCommand
 deactivate Model
-
-note right of AttendanceCommand
-  Alternative Flow: Mark All Students
-  If studentId is null (s/all):
-  1. Get all persons from model.getAddressBook().getPersonList()
-  2. For each person, repeat:
-     - getAttendanceRecord()
-     - markAttendance() → new AttendanceRecord
-     - create new Person with updated record
-     - setPerson(oldPerson, newPerson)
-  3. Return success message with count
-end note
 
 create CommandResult
 AttendanceCommand -> CommandResult
