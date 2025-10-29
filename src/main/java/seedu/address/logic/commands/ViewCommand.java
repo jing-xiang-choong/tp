@@ -164,27 +164,6 @@ public class ViewCommand extends Command {
                                 .append("\n");
                     });
         }
-
-        // Consultations
-        sb.append("\n=== CONSULTATION RECORDS ===\n");
-        List<Consultation> consultations = person.getConsultations();
-
-        if (consultations == null || consultations.isEmpty()) {
-            sb.append("No consultations recorded yet.\n");
-        } else {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy h:mma");
-
-            consultations.stream()
-                    .sorted(Comparator.comparing(Consultation::getDateTime))
-                    .forEach(c -> {
-                        LocalDateTime dt = c.getDateTime();
-                        String formattedDateTime = dt.format(formatter)
-                                .replaceAll("\\s+", " ") // normalize spacing
-                                .trim();
-                        sb.append("• ").append(formattedDateTime).append("\n");
-                    });
-        }
-
         return sb.toString();
     }
 
