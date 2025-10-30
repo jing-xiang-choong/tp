@@ -1,0 +1,68 @@
+@startuml
+!include style.puml
+skinparam arrowThickness 1.1
+skinparam arrowColor MODEL_COLOR
+skinparam classBackgroundColor MODEL_COLOR
+
+object Person {
+    name = "John Doe"
+    studentId = "A0123456X"
+    email = "john@u.nus.edu"
+}
+
+object Remark {
+    value = "Needs extra help\nwith OOP concepts"
+}
+
+object AttendanceRecord {
+    Week 1: Present
+    Week 2: Absent
+}
+
+object Grade1 {
+    assignmentName = "Midterm"
+    score = 85
+}
+
+object Grade2 {
+    assignmentName = "Quiz1"
+    score = 90
+}
+
+object Consultation {
+    dateTime = "22 Oct 2025 15:30"
+}
+
+object ModuleCode {
+    value = "CS2103T"
+}
+
+object Tag1 {
+    tagName = "struggling"
+}
+
+object Tag2 {
+    tagName = "needsHelp"
+}
+
+Person --> "0..1" Remark : has >
+Person --> "1" AttendanceRecord : tracks >
+Person --> "*" Grade1 : earns >
+Person --> "*" Grade2
+Person --> "*" Consultation : schedules >
+Person --> "*" ModuleCode : enrolled in >
+Person --> "*" Tag1 : tagged with >
+Person --> "*" Tag2
+
+note right of Remark
+  Remark is optional (can be null)
+  Supports multi-line text
+  Replaces existing remark when updated
+end note
+
+note bottom of Person
+  Person aggregates all student data
+  including the optional remark field
+end note
+
+@enduml

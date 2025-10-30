@@ -1,0 +1,27 @@
+@startuml
+skin rose
+skinparam ActivityFontSize 15
+skinparam ArrowFontSize 12
+start
+:User enters remark command;
+
+if () then ([valid format?])
+    :Parse student ID and remark text;
+
+    if () then ([student ID exists?])
+        if () then ([remark not blank?])
+            :Create new Person with updated remark;
+            :Update model and save to storage;
+            :Display success message;
+        else ([blank remark])
+            :Show validation error;
+        endif
+    else ([student not found])
+        :Show "student not found" error;
+    endif
+else ([invalid format])
+    :Show command format error;
+endif
+
+stop
+@enduml
