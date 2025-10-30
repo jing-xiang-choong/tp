@@ -6,14 +6,20 @@ Class "{abstract}\nCommand" as Command {
   +execute(Model): CommandResult
 }
 Class RemarkCommand {
+  -studentId: StudentId
+  -remark: Remark
   +COMMAND_WORD: String
-  +MESSAGE_USAGE: String
-  +MESSAGE_NOT_IMPLEMENTED_YET: String
   +execute(Model): CommandResult
 }
 Class CommandException
+Class StudentId
+Class Remark {
+  +value: String
+}
 
 RemarkCommand -up-|> Command
 Command ..> CommandException: throws >
 RemarkCommand .right.> CommandException: throws >
+RemarkCommand --> StudentId
+RemarkCommand --> Remark
 @enduml
