@@ -1,7 +1,7 @@
 @startuml
 !include style.puml
 
-title Consultation Feature - Sequence Diagram (via Add/Edit Commands)
+title Consultation Feature - Sequence Diagram (via Add Command)
 
 ' ==============================
 ' Logic Layer
@@ -11,8 +11,6 @@ participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":AddCommandParser" as AddCommandParser LOGIC_COLOR
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
-participant ":EditCommandParser" as EditCommandParser LOGIC_COLOR
-participant "e:EditCommand" as EditCommand LOGIC_COLOR
 end box
 
 ' ==============================
@@ -35,7 +33,7 @@ end box
 ' ==============================
 ' ADD COMMAND SEQUENCE
 ' ==============================
-[-> LogicManager : execute("add n/John Doe s/A0123456X e/john@u.nus.edu m/CS2103T c/22-10-2025 15:30")
+[-> LogicManager : execute("add n/John Doe s/A0123456X e/john@u.nus.edu m/CS2103T c/22/10/2025 15:30")
 activate LogicManager
 
 LogicManager -> AddressBookParser : parseCommand("add n/John Doe ...")
@@ -45,7 +43,7 @@ create AddCommandParser
 AddressBookParser -> AddCommandParser
 activate AddCommandParser
 
-AddCommandParser -> Consultation : parseConsultations("22-10-2025 15:30")
+AddCommandParser -> Consultation : parseDateTime("22-10-2025 15:30")
 activate Consultation
 Consultation --> AddCommandParser : consultationList
 deactivate Consultation
@@ -84,66 +82,4 @@ deactivate AddCommand
 [<-- LogicManager
 deactivate LogicManager
 
-
-' ==============================
-' EDIT COMMAND SEQUENCE
-' ==============================
-[-> LogicManager : execute("edit 1 c/25-10-2025 14:00")
-activate LogicManager
-
-LogicManager -> AddressBookParser : parseCommand("edit 1 c/25-10-2025 14:00")
-activate AddressBookParser
-
-create EditCommandParser
-AddressBookParser -> EditCommandParser
-activate EditCommandParser
-
-EditCommandParser -> Consultation : parseConsultations("25-10-2025 14:00")
-activate Consultation
-Consultation --> EditCommandParser : consultationList
-deactivate Consultation
-
-create EditCommand
-EditCommandParser -> EditCommand
-activate EditCommand
-
-EditCommand --> EditCommandParser : e
-deactivate EditCommand
-destroy EditCommandParser
-
-AddressBookParser --> LogicManager : e
-deactivate AddressBookParser
-
-LogicManager -> EditCommand : execute()
-activate EditCommand
-
-EditCommand -> Model : getFilteredPersonList()
-activate Model
-Model --> EditCommand : personToEdit
-deactivate Model
-
-EditCommand -> Person : setConsultations(newConsultations)
-activate Person
-Person --> EditCommand : updatedPerson
-deactivate Person
-
-EditCommand -> Model : setPerson(personToEdit, updatedPerson)
-activate Model
-Model --> EditCommand : success
-deactivate Model
-
-EditCommand -> Model : saveAddressBook()
-activate Model
-Model -> Storage : save()
-activate Storage
-Storage --> Model
-deactivate Storage
-Model --> EditCommand
-deactivate Model
-
-EditCommand --> LogicManager : CommandResult("Consultations updated")
-deactivate EditCommand
-
-[<-- LogicManager
-deactivate LogicManager
 @enduml
