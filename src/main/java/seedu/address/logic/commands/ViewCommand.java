@@ -2,11 +2,11 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.time.format.DateTimeFormatter;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
@@ -127,7 +127,8 @@ public class ViewCommand extends Command {
             sb.append("Grades: ").append(gradesText).append("\n");
         }
 
-        // Consultations
+
+        //consultations
         if (person.getConsultations() != null && !person.getConsultations().isEmpty()) {
             String consultationsText = person.getConsultations().stream()
                     .map(c -> c.getDateTime().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")))
