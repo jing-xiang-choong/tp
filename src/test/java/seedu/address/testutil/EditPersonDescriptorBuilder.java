@@ -47,7 +47,9 @@ public class EditPersonDescriptorBuilder {
         if (!person.getModuleCodes().isEmpty()) {
             descriptor.setModuleCodes(person.getModuleCodes());
         }
-        descriptor.setTags(person.getTags());
+        if (!person.getTags().isEmpty()) {
+            descriptor.setTags(person.getTags());
+        }
     }
 
     /**

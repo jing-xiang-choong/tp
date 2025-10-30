@@ -100,6 +100,10 @@ public class EditCommand extends Command {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
+        if (!editPersonDescriptor.isAnyFieldEdited()) {
+            throw new CommandException(MESSAGE_NOT_EDITED);
+        }
+
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
@@ -115,8 +119,65 @@ public class EditCommand extends Command {
 
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+
+        String editedFieldsMessage = buildEditedFieldsMessage(personToEdit, editedPerson, editPersonDescriptor);
         return new CommandResult(Messages.successMessage(String.format(MESSAGE_EDIT_PERSON_SUCCESS,
-                Messages.formatStudentId(editedPerson))));
+                Messages.formatStudentId(editedPerson)) + "\n" + editedFieldsMessage));
+    }
+
+    /**
+     * Builds a message detailing which fields were edited and their new values.
+     */
+    private String buildEditedFieldsMessage(Person original, Person edited, EditPersonDescriptor descriptor) {
+        StringBuilder message = new StringBuilder("\nEdited fields:");
+
+        if (descriptor.getName().isPresent()) {
+            message.append("\n  • Name: ").append(edited.getName());
+        }
+        if (descriptor.getPhone().isPresent()) {
+            message.append("\n  • Phone: ").append(edited.getPhone());
+        }
+        if (descriptor.getEmail().isPresent()) {
+            message.append("\n  • Email: ").append(edited.getEmail());
+        }
+        if (descriptor.getAddress().isPresent()) {
+            message.append("\n  • Address: ").append(edited.getAddress());
+        }
+        if (descriptor.getStudentId().isPresent()) {
+            message.append("\n  • Student ID: ").append(edited.getStudentId());
+        }
+        if (descriptor.getModuleCodes().isPresent()) {
+            message.append("\n  • Module Codes: ").append(edited.getModuleCodes());
+        }
+        if (descriptor.getTags().isPresent()) {
+            message.append("\n  • Tags: ").append(edited.getTags());
+        }
+        if (descriptor.getConsultations().isPresent()) {
+            if (edited.getConsultations() == null || edited.getConsultations().isEmpty()) {
+                message.append("\n  • Consultations: None");
+            } else {
+                message.append("\n  • Consultations: ").append(edited.getConsultations());
+            }
+        }
+        if (descriptor.getGrade().isPresent()) {
+            Grade grade = descriptor.getGrade().get();
+            message.append("\n  • Grade updated: ").append(grade.assignmentName)
+                   .append(" → ").append(grade.score);
+        }
+        if (descriptor.getAttendance().isPresent()) {
+            Attendance attendance = descriptor.getAttendance().get();
+            if (attendance.getStatus() == AttendanceStatus.UNMARK) {
+                message.append("\n  • Attendance unmarked: Week ").append(attendance.getWeek().value);
+            } else {
+                message.append("\n  • Attendance: Week ").append(attendance.getWeek().value)
+                       .append(" → ").append(attendance.getStatus());
+            }
+        }
+        if (descriptor.getRemark().isPresent()) {
+            message.append("\n  • Remark: ").append(edited.getRemark());
+        }
+
+        return message.toString();
     }
 
     /**

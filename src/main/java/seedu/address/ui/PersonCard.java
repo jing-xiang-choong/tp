@@ -74,10 +74,10 @@ public class PersonCard extends UiPart<Region> {
             String moduleCodesText = person.getModuleCodes().stream()
                     .map(mc -> mc.value)
                     .reduce((a, b) -> a + ", " + b)
-                    .orElse("N/A");
+                    .orElse("No Modules Recorded");
             moduleCode.setText(moduleCodesText);
         } else {
-            moduleCode.setText("N/A");
+            moduleCode.setText("No Modules Recorded");
         }
 
         // Populate attendance grid
@@ -86,13 +86,20 @@ public class PersonCard extends UiPart<Region> {
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
-        person.getGrades().stream()
-                .sorted(Comparator.comparing(grade -> grade.assignmentName))
-                .forEach(grade -> {
-                    Label gradeLabel = new Label(grade.toString());
-                    gradeLabel.getStyleClass().add("grade-label");
-                    grades.getChildren().add(gradeLabel);
-                });
+
+        if (person.getGrades().isEmpty()) {
+            Label noGradesLabel = new Label("No Grades Recorded");
+            noGradesLabel.getStyleClass().add("empty-label");
+            grades.getChildren().add(noGradesLabel);
+        } else {
+            person.getGrades().stream()
+                    .sorted(Comparator.comparing(grade -> grade.assignmentName))
+                    .forEach(grade -> {
+                        Label gradeLabel = new Label(grade.toString());
+                        gradeLabel.getStyleClass().add("grade-label");
+                        grades.getChildren().add(gradeLabel);
+                    });
+        }
         consultations.setText(getConsultationsSummary(person));
         remark.setText(person.getRemark() != null ? person.getRemark().value : "No remarks");
     }

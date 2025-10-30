@@ -64,7 +64,7 @@ public class AttendanceCommandTest {
 
         CommandResult result = command.execute(model);
 
-        assertEquals(String.format(AttendanceCommand.MESSAGE_MARK_ATTENDANCE_SUCCESS,
+        assertEquals(String.format("✓ " + AttendanceCommand.MESSAGE_MARK_ATTENDANCE_SUCCESS,
                 student.getName(), week.value, status), result.getFeedbackToUser());
 
         // Verify attendance was marked
@@ -97,7 +97,7 @@ public class AttendanceCommandTest {
 
         CommandResult result = command.execute(model);
 
-        assertEquals(String.format(AttendanceCommand.MESSAGE_MARK_ALL_SUCCESS,
+        assertEquals(String.format("✓ " + AttendanceCommand.MESSAGE_MARK_ALL_SUCCESS,
                 week.value, status, 2), result.getFeedbackToUser());
 
         // Verify attendance was marked for both students
@@ -126,14 +126,20 @@ public class AttendanceCommandTest {
                 .build();
         model.addPerson(student);
 
+        // First mark attendance as present
         Week week = new Week(1);
+        AttendanceCommand firstCommand = new AttendanceCommand(new StudentId("A0123456X"), week,
+                AttendanceStatus.PRESENT);
+        firstCommand.execute(model);
+
+        // Then update to absent
         AttendanceStatus newStatus = AttendanceStatus.ABSENT;
         AttendanceCommand command = new AttendanceCommand(new StudentId("A0123456X"), week, newStatus);
 
         CommandResult result = command.execute(model);
 
-        assertEquals(String.format(AttendanceCommand.MESSAGE_MARK_ATTENDANCE_SUCCESS,
-                student.getName(), week.value, newStatus), result.getFeedbackToUser());
+        assertEquals(String.format("✓ Updated attendance for %s: Week %s (was: %s, now: %s)",
+                student.getName(), week.value, AttendanceStatus.PRESENT, newStatus), result.getFeedbackToUser());
 
         // Verify attendance was updated
         Person updatedStudent = model.findPersonByStudentId(new StudentId("A0123456X"));
@@ -167,7 +173,7 @@ public class AttendanceCommandTest {
 
         CommandResult result = command.execute(model);
 
-        assertEquals(String.format(AttendanceCommand.MESSAGE_MARK_ATTENDANCE_SUCCESS,
+        assertEquals(String.format("✓ " + AttendanceCommand.MESSAGE_MARK_ATTENDANCE_SUCCESS,
                 student.getName(), week.value, status), result.getFeedbackToUser());
 
         // Verify attendance was marked

@@ -663,6 +663,134 @@ The following sequence diagram shows how consultations are processed as part of 
     * Pros: Simpler parsing logic and clearer documentation. Ensures data consistency across all entries.
     * Cons: Less user-friendly; rejects valid but differently formatted datetimes. May frustrate users unfamiliar with the required format.
 
+### Remark Feature
+
+#### Implementation
+
+The remark feature allows teaching assistants to add personalized notes and observations about individual students. It is implemented through the `Remark` model class, `RemarkCommand` command class, and `RemarkCommandParser` parser class.
+
+**Key Components:**
+
+The `Remark` class:
+- Immutable value object storing a remark string
+- Validates that remarks contain at least one non-whitespace character using regex pattern `(?s)[^\\s].*`
+- Supports multi-line text with the `(?s)` DOTALL flag, allowing remarks to span multiple lines
+- Implements proper `equals()` and `hashCode()` for comparison operations
+- Stored as an optional field in the `Person` class (can be null)
+
+The `RemarkCommand`:
+- Takes a student ID and a remark text as parameters
+- Uses student ID lookup to find the target student via `Model#findPersonByStudentId()`
+- Creates a new `Person` object with the updated remark (defensive copying)
+- Replaces any existing remark (not cumulative)
+- Only accepts student IDs, not index-based lookup
+
+The `RemarkCommandParser`:
+- Parses user input in the format `remark s/STUDENT_ID r/REMARK`
+- Extracts and validates both the student ID and remark text
+- Uses `PREFIX_STUDENT_ID` (s/) and `PREFIX_REMARK` (r/) for parameter identification
+- Validates that both required prefixes are present and not duplicated
+- Trims whitespace from the remark text before validation
+
+**Execution Flow:**
+
+Given below is an example usage scenario and how the remark mechanism behaves.
+
+**Step 1.** The user executes `remark s/A0123456X r/Needs extra help with OOP concepts` to add a remark for student A0123456X.
+
+**Step 2.** The command is parsed by `AddressBookParser`, which identifies it as a remark command and creates a `RemarkCommandParser`.
+
+**Step 3.** `RemarkCommandParser` parses the arguments:
+- Tokenizes the input using `ArgumentTokenizer` with `PREFIX_STUDENT_ID` and `PREFIX_REMARK`
+- Verifies both required prefixes are present and the preamble is empty
+- Verifies no duplicate prefixes using `ArgumentMultimap#verifyNoDuplicatePrefixesFor()`
+- Extracts student ID value and parses it using `ParserUtil#parseStudentId()`
+- Extracts remark value and parses it using `ParserUtil#parseRemark()`
+- Creates a `RemarkCommand` with the validated student ID and remark
+
+**Step 4.** When `RemarkCommand#execute()` is called:
+- Calls `Model#findPersonByStudentId()` to locate the student
+- Throws `CommandException` with message "No student found with ID: [ID]" if student not found
+- Creates a new `Person` object using `createStudentWithRemark()` helper method
+- The helper method constructs a new `Person` with all existing fields preserved except remark is replaced
+- Calls `Model#setPerson(studentToEdit, editedStudent)` to update the model
+- Returns a `CommandResult` with success message showing the updated student details
+
+**Step 5.** The model persists the changes:
+- Updated person list triggers storage save via JSON serialization
+- Remark is serialized as a nullable string field in `JsonAdaptedPerson`
+- If remark is null, it is saved as null in JSON
+- Data is written to disk automatically
+
+The following sequence diagram shows how a remark operation works:
+
+<puml src="diagrams/RemarkSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `remark s/A0123456X r/...` Command" />
+
+<box type="info" seamless>
+
+**Note:** The lifeline for `RemarkCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
+</box>
+
+**UI Display:**
+
+The remark is displayed in the student card in the UI:
+- Shows in a dedicated section with a 📝 icon
+- Displays "No remarks" if the remark field is null
+- Supports multi-line display with text wrapping enabled
+- Located after the consultations section in the card layout
+
+#### Design Considerations
+
+**Aspect: Student identification method**
+
+* **Alternative 1 (current choice):** Only support student ID-based lookup
+  * Pros: Unambiguous identification - student ID is unique. Works regardless of filter state or displayed list. Consistent with the nature of remarks as persistent student attributes. Prevents accidental remark assignment to wrong student due to changing list order.
+  * Cons: Requires user to know or look up the student ID. Cannot use index for quick operations on visible students. More typing required compared to index.
+
+* **Alternative 2:** Support both index and student ID lookup
+  * Pros: More flexible for different workflows. Index is faster for students currently visible in list.
+  * Cons: Risk of assigning remarks to wrong student if list changes. Index-based lookup is context-dependent. More complex parsing logic.
+
+**Aspect: Remark update behavior**
+
+* **Alternative 1 (current choice):** Replace existing remark with new remark
+  * Pros: Simple and predictable behavior. Consistent with edit command semantics. Prevents remark accumulation and clutter. Easy to understand - latest remark is always shown.
+  * Cons: Previous remark content is lost. No history of remark changes. Cannot append to existing remarks without manually copying old content.
+
+* **Alternative 2:** Append new remarks to existing remarks
+  * Pros: Preserves history of observations. Can build up notes over time. No data loss.
+  * Cons: Remarks can grow very long. No clear structure or timestamps. Harder to find recent information. Needs delimiter or formatting to separate entries.
+
+**Aspect: Multi-line support**
+
+* **Alternative 1 (current choice):** Support multi-line remarks with DOTALL regex mode
+  * Pros: Allows detailed notes with paragraphs and structure. Natural for longer observations. Flexible formatting for complex information.
+  * Cons: Regex validation more complex. UI must handle multi-line display properly. Can take more vertical space in display.
+
+* **Alternative 2:** Restrict to single-line remarks
+  * Pros: Simpler validation. Predictable display size. Encourages concise notes.
+  * Cons: Limited expressiveness. Cannot organize complex information. Need multiple short remarks instead of structured notes.
+
+**Aspect: Remark storage location**
+
+* **Alternative 1 (current choice):** Store remark as optional field in Person class
+  * Pros: Direct association between person and remark. Easy to access when viewing student. Simplifies serialization. Follows object-oriented principles.
+  * Cons: Remark is duplicated if person object is copied. Cannot easily query all remarks independently.
+
+* **Alternative 2:** Store remarks in separate RemarkBook class
+  * Pros: Separation of concerns. Can query all remarks independently. Supports remark-focused operations.
+  * Cons: More complex architecture. Need to maintain relationships between Person and Remark. More complex serialization logic. Overhead for simple feature.
+
+**Aspect: Empty remark handling**
+
+* **Alternative 1 (current choice):** Reject empty or whitespace-only remarks
+  * Pros: Ensures remarks contain meaningful content. Prevents accidental empty submissions. Clear validation feedback to user.
+  * Cons: Cannot explicitly clear a remark using the remark command. Need to use edit command or delete/re-add student to remove remark.
+
+* **Alternative 2:** Accept empty remarks to clear existing remark
+  * Pros: Provides direct way to remove remarks. Consistent with "set remark to X" semantics where X can be empty.
+  * Cons: Easy to accidentally clear remarks. Less intuitive validation - why validate format if empty is allowed? Ambiguous whether empty input means "clear" or "keep existing".
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, configuration, dev-ops**
@@ -813,6 +941,28 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       3a2. User selects a valid student in the class/session.
       Use case resumes from step 4.
 
+**Use case: UC6 - Add a remark to a student**
+
+**MSS**
+
+1.  User requests to add a remark to a specific student.
+2.  TeachMate requests for the student ID and remark text.
+3.  User provides the student ID and enters the remark.
+4.  TeachMate adds the remark to the student and displays the updated student details.
+    Use case ends.
+
+**Extensions**
+
+* 3a. Student ID does not exist in the system.
+      3a1. TeachMate displays 'No student found with ID: [ID]'.
+      3a2. User enters a valid student ID.
+      Use case resumes from step 4.
+
+* 3b. Remark text is empty or contains only whitespace.
+      3b1. TeachMate displays 'Remarks should not be blank'.
+      3b2. User enters valid remark text.
+      Use case resumes from step 4.
+
 *{More to be added}*
 
 ### Non-Functional Requirements
@@ -841,6 +991,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Command**: A text-based instruction entered by the user to perform operations in TeachMate, following the format `COMMAND_WORD [parameters]`
 * **Prefix**: A short identifier (e.g., n/, s/, e/, m/, t/) used before parameter values in commands to specify which field the value corresponds to
 * **Duplicate Student**: A student entry that shares the same Student ID with an existing student in the system, regardless of other fields
+* **Remark**: A personalized note or observation recorded by a TA about an individual student, supporting multi-line text for detailed tracking of student progress, learning needs, or behavior patterns
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -888,6 +1039,33 @@ testers are expected to do more *exploratory* testing.
       Expected: Similar to previous.
 
 1. _{ more test cases …​ }_
+
+### Adding a remark to a student
+
+1. Adding a remark to an existing student
+
+   1. Prerequisites: List all students using the `list` command. At least one student in the list. Note a student's ID (e.g., A0123456X).
+
+   1. Test case: `remark s/A0123456X r/Needs extra help with OOP concepts`<br>
+      Expected: Remark is added to the student with ID A0123456X. Success message shows the updated student details. The student card in the UI displays the remark with a 📝 icon.
+
+   1. Test case: `remark s/A0123456X r/Strong understanding of data structures. Excellent participation in class.`<br>
+      Expected: Multi-line remark is added successfully. Previous remark (if any) is replaced. Student card displays the new remark with text wrapping.
+
+   1. Test case: `remark s/A9999999Z r/Some remark` (where A9999999Z does not exist)<br>
+      Expected: No remark is added. Error message shows "No student found with ID: A9999999Z".
+
+   1. Test case: `remark s/A0123456X r/   ` (remark with only whitespace)<br>
+      Expected: No remark is added. Error message shows "Remarks should not be blank".
+
+   1. Test case: `remark s/A0123456X` (missing remark prefix)<br>
+      Expected: No remark is added. Error message shows invalid command format with usage instructions.
+
+   1. Test case: `remark r/Some remark` (missing student ID prefix)<br>
+      Expected: No remark is added. Error message shows invalid command format with usage instructions.
+
+   1. Other incorrect remark commands to try: `remark`, `remark A0123456X r/test` (missing s/ prefix), `remark s/INVALID r/test` (invalid student ID format)<br>
+      Expected: Similar error messages indicating the specific validation failure.
 
 ### Saving data
 

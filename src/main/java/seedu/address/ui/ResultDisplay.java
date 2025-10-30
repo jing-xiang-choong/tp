@@ -115,20 +115,23 @@ public class ResultDisplay extends UiPart<Region> {
                 continue;
             }
 
-            // Add bullet points for list items
-            if (line.matches("^[\\d]+\\..*")) {
-                // Numbered list
-                content.append("<p>").append(escapeHtml(line)).append("</p>");
-            } else if (line.startsWith("-") || line.startsWith("*")) {
-                // Bullet list
-                content.append("<li>").append(escapeHtml(line.substring(1).trim())).append("</li>");
+            // Handle list items (numbered, bullet, or bullet point)
+            if (line.matches("^[\\d]+\\..*") || line.startsWith("-") || line.startsWith("*")) {
+                // List item - ensure ul tag is open
+                if (!content.toString().contains("<ul") || content.toString().endsWith("</ul>")) {
+                    content.append("<ul class='bullet-list'>");
+                }
+                // Remove the list marker and add as list item
+                String listContent = line.replaceFirst("^[-*\\d+.]\\s*", "");
+                content.append("<li>").append(escapeHtml(listContent)).append("</li>");
             } else {
+                // Close any open list before adding non-list content
                 if (content.toString().endsWith("</li>")) {
                     content.append("</ul>");
                 }
 
-                String formatted = highlightImportantParts(line);
-                content.append("<p>").append(formatted).append("</p>");
+                String highlighted = highlightImportantParts(line);
+                content.append("<p>").append(highlighted).append("</p>");
             }
         }
 
@@ -151,9 +154,6 @@ public class ResultDisplay extends UiPart<Region> {
 
         // Highlight module codes (CS2103T format)
         text = text.replaceAll("([A-Z]{2,3}\\d{4}[A-Z]?)", "<span class='module-code'>$1</span>");
-
-        // Highlight numbers (grades, counts)
-        text = text.replaceAll("\\b(\\d+)\\b", "<span class='number'>$1</span>");
 
         // Highlight tags in brackets
         text = text.replaceAll("\\[([^\\]]+)\\]", "<span class='tag'>[$1]</span>");

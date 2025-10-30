@@ -159,7 +159,7 @@ Format:
 
 **What will be displayed:**
 
-The view command displays comprehensive information in two sections:
+The view command displays comprehensive information in three sections:
 
 1. **Student Details:**
    * Full name
@@ -167,6 +167,8 @@ The view command displays comprehensive information in two sections:
    * Email address
    * All enrolled module codes (comma-separated)
    * Tags (if any, comma-separated)
+   * Grades (if any, in format "assignment: score")
+   * Remark (if any)
 
 2. **Attendance Record:**
    * Week-by-week attendance status for all recorded weeks
@@ -176,7 +178,13 @@ The view command displays comprehensive information in two sections:
    * Weeks are displayed in ascending order (Week 1, Week 2, etc.)
    * If no attendance has been recorded yet, displays: "No attendance recorded yet."
 
-**Success message:**
+3. **Consultation Records:**
+   * All scheduled consultation sessions with date and time
+   * Displayed in chronological order
+   * Format: "• [date] [time]" (e.g., "• 26 Oct 2025 4:00pm")
+   * If no consultations are scheduled, displays: "No consultations recorded yet."
+
+**Output format:**
 ```
 === STUDENT DETAILS ===
 Name: [name]
@@ -185,11 +193,14 @@ Email: [email]
 Modules: [module codes]
 Tags: [tags]
 Grades: [grades]
-Consultations: [consultation dates]
 Remark: [remark]
 
 === ATTENDANCE RECORD ===
 Week [number]: [symbol] [status]
+...
+
+=== CONSULTATION RECORDS ===
+• [consultation date and time]
 ...
 ```
 
@@ -214,11 +225,17 @@ Student ID: A0123456X
 Email: johnd@u.nus.edu
 Modules: CS2103T, CS2101
 Tags: struggling, needsHelp
+Grades: Midterm: 85, Quiz1: 90
+Remark: Very active in class discussions
 
 === ATTENDANCE RECORD ===
 Week 1: ✓ Present
 Week 2: ✗ Absent
 Week 3: ✓ Present
+
+=== CONSULTATION RECORDS ===
+• 26 Oct 2025 4:00pm
+• 03 Nov 2025 2:30pm
 ```
 
 ### Marking attendance : `attendance`
@@ -285,7 +302,6 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [s/STUDENT_ID] [m/M
 * Existing values will be overwritten by the input values
 * When editing module codes, the existing module codes will be removed and replaced (not cumulative)
 * When editing tags, the existing tags will be removed and replaced (not cumulative)
-* You can remove all tags by typing `t/` without specifying any tags
 * You can remove all module codes by typing `m/` without specifying any module codes
 * Editing consultations should still follow the same format as in the `add` command
 * **Editing grades:** Use `g/ASSIGNMENT_NAME:SCORE` to update an existing grade. The assignment must already exist for the student, otherwise an error will be shown.
@@ -300,7 +316,7 @@ The edit command still supports `p/PHONE` and `a/ADDRESS` prefixes for backward 
 
 Examples:
 *  `edit 1 s/A9999999Z e/newemail@u.nus.edu` - Edits the student ID and email of the 1st student
-*  `edit 2 n/Jane Doe t/` - Edits the name of the 2nd student and clears all tags
+*  `edit 2 n/Jane Doe t/friends` - Edits the name of the 2nd student and replaces all tags with "friends"
 *  `edit 3 m/CS2103T m/CS2101` - Replaces all module codes with CS2103T and CS2101
 *  `edit 1 g/Midterm:90` - Updates the Midterm grade to 90 for the 1st student (assignment must already exist)
 *  `edit 2 w/5:present` - Marks the 2nd student as present for week 5
@@ -401,7 +417,7 @@ Format: `remark s/STUDENT_ID r/REMARK`
 * `REMARK` can contain any text including spaces and special characters
 * `REMARK` supports multi-line text for longer notes
 * The remark must not be blank (must contain at least one non-whitespace character)
-* If a remark already exists for the student, it will be replaced with the new remark
+* Existing remarks will be overwritten by the new remark (not cumulative)
 * The student must exist in TeachMate
 
 **Success message:** `Added remark to Student: [student details]`
