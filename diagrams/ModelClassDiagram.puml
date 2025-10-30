@@ -24,6 +24,7 @@ Class ModuleCode
 Class AttendanceRecord
 Class Consultation
 Class Grade
+Class Remark
 
 Class I #FFFFFF
 }
@@ -52,6 +53,7 @@ Person *--> "*" ModuleCode
 Person *--> AttendanceRecord
 Person *--> "*" Consultation
 Person *--> "*" Grade
+Person *--> Remark
 Person -[hidden]up--> I
 UniquePersonList -[hidden]right-> I
 

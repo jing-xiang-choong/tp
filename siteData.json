@@ -54,6 +54,7 @@
         "view-student-feature": "View Student Feature",
         "attendance-tracking-feature": "Attendance Tracking Feature",
         "grade-feature": "Grade Feature",
+        "delete-grade-feature": "Delete Grade Feature",
         "consultation-feature": "Consultation Feature",
         "remark-feature": "Remark Feature",
         "documentation-logging-testing-configuration-dev-ops": "Documentation, logging, testing, configuration, dev-ops",
@@ -65,9 +66,17 @@
         "glossary": "Glossary",
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
         "launch-and-shutdown": "Launch and shutdown",
-        "deleting-a-person": "Deleting a person",
+        "adding-a-student": "Adding a student",
+        "editing-a-student": "Editing a student",
+        "deleting-a-student": "Deleting a student",
+        "viewing-a-student": "Viewing a student",
         "adding-a-remark-to-a-student": "Adding a remark to a student",
-        "saving-data": "Saving data"
+        "managing-attendance": "Managing attendance",
+        "managing-grades": "Managing grades",
+        "managing-tags": "Managing tags",
+        "finding-and-filtering-students": "Finding and filtering students",
+        "saving-data": "Saving data",
+        "appendix-planned-enhancements": "Appendix: Planned Enhancements"
       },
       "headingKeywords": {}
     },
@@ -112,6 +121,8 @@
       "title": "User Guide",
       "headings": {
         "teachmate-user-guide": "TeachMate User Guide",
+        "why-teachmate": "Why TeachMate?",
+        "what-teachmate-does-for-you": "What TeachMate Does for You",
         "quick-start": "Quick start",
         "features": "Features",
         "viewing-help-help": "Viewing help : help",
@@ -142,7 +153,7 @@
       "src": "index.md",
       "title": "",
       "headings": {
-        "addressbook-level-3": "AddressBook Level-3"
+        "teachmate": "TeachMate"
       },
       "headingKeywords": {}
     },

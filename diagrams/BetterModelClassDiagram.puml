@@ -21,4 +21,7 @@ Person *--> Address
 Person *--> StudentId
 Person *--> "*" ModuleCode
 Person *--> "*" Grade
+Person *--> AttendanceRecord
+Person *--> "*" Consultation
+Person *--> Remark
 @enduml
