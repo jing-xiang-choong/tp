@@ -68,7 +68,7 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [Ui.java](../src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [Ui.java]<!-- -->(../src/main/java/seedu/address/ui/Ui.java)
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
