@@ -49,7 +49,7 @@ Person *--> Email
 Person *--> Address
 Person *--> "*" Tag
 Person *--> StudentId
-Person *--> "*" ModuleCode
+Person *--> "1..*" ModuleCode
 Person *--> AttendanceRecord
 Person *--> "*" Consultation
 Person *--> "*" Grade
