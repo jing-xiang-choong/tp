@@ -177,6 +177,27 @@
         "project-addressbook-level-3": "Project: AddressBook Level 3"
       },
       "headingKeywords": {}
+    },
+    {
+      "src": "team/shaozhi21.md",
+      "headings": {
+        "project-portfolio-shao-zhi-shaozhi21": "Project Portfolio: Shao Zhi (@ShaoZhi21)",
+        "overview": "Overview",
+        "reflections-on-growth": "Reflections on Growth",
+        "key-feature-1-view-command": "Key Feature #1 — View Command",
+        "understanding-the-need": "Understanding the Need",
+        "my-contribution": "My Contribution",
+        "challenges-and-learning": "Challenges and Learning",
+        "impact": "Impact",
+        "key-feature-2-attendance": "Key Feature #2 — Attendance",
+        "understanding-the-need-2": "Understanding the Need",
+        "my-contribution-2": "My Contribution",
+        "challenges-and-learning-2": "Challenges and Learning",
+        "impact-2": "Impact",
+        "continuous-documentation-and-defect-fixes": "Continuous Documentation and Defect Fixes",
+        "what-this-means-for-users": "What This Means for Users"
+      },
+      "headingKeywords": {}
     }
   ]
 }
