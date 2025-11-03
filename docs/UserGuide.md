@@ -123,7 +123,7 @@ TeachMate uses a simple command-based system. Think of it like typing instructio
 * `add` is the command
 * `n/John Doe` means name is "John Doe"
 * `s/A0123456X` means student ID is "A0123456X"
-* `e/e123413@u.nus.edu` means the student's email is "e123413@u.nus.edu"
+* `e/e123413@u.nus.edu` means the student's email is "e123413@<!-- -->u.nus.edu"
 * `m/CS2103T` means the student is enrolled in module CS2103T
 
 **2. Understanding the Format Notation**
